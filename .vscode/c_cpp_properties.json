@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "PS2",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/local/ps2dev/ps2sdk/ee/include/**",
+                "/usr/local/ps2dev/ps2sdk/common/include/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/local/ps2dev/ee/bin/mips64r5900el-ps2-elf-gcc",
+            "cStandard": "c99",
+            "cppStandard": "c++98",
+            "intelliSenseMode": "ps2-gcc-mips"
+        }
+    ],
+    "version": 4
+}

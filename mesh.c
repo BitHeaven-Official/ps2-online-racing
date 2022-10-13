@@ -37,7 +37,7 @@ int load_model(struct model *m, char *b, int b_len)
 	m->vertex_count = b_len / 16;
 	m->vertex_size = 1;
 	m->vertex_position_offset = 0;
-	m->face_count = m->vertex_count * 3;
+	m->face_count = m->vertex_count / 3;
 	info("initializing model: verts=%d, faces=%d, bytes in buf=%d",
 		m->vertex_count, m->face_count, m->buffer_len);
 
@@ -54,7 +54,7 @@ int load_model(struct model *m, char *b, int b_len)
 	q->dw[1] = GS_REG_RGBAQ;
 	q++;
 	// start vertex data GIFTAG
-	q->dw[0] = 0x1000000000000000 | (m->face_count & 0x3fff);
+	q->dw[0] = 0x3000000000000000 | (m->face_count & 0x3fff);
 	q->dw[1] = 0x0000000000000555;
 	q++;
 

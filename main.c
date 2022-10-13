@@ -69,7 +69,7 @@ qword_t *draw(qword_t *q)
 int main()
 {
 	printf("Hello\n");
-	buf = malloc(DRAWBUF_LEN);
+	buf = malloc(100*16);
 	z = malloc(sizeof(zbuffer_t));
 	// init DMAC
 	dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
@@ -87,7 +87,7 @@ int main()
 	while(1) {
 		dma_wait_fast();
 		qword_t *q = buf;
-		memset(buf, 0, DRAWBUF_LEN);
+		memset(buf, 0, 100*16);
 		// clear
 		q = draw_disable_tests(q, 0, z);
 		q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 10, 10, 10);

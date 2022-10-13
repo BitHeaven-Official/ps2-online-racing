@@ -18,7 +18,10 @@
 #define SHIFT_AS_I64(x, b) (((int64_t)x)<<b)
 #define BITftoi4(x) ((x)<<4)
 
-
+// 640x480 (4:3)
+// 853x480 (16:9)
+// 768x576 (4:3)
+// 1024x576 (16:9)
 #define VID_W 640
 #define VID_H 448
 
@@ -71,7 +74,7 @@ qword_t *draw(qword_t *q)
 int main()
 {
 	printf("Hello\n");
-	buf = malloc(100*16);
+	qword_t *buf = malloc(100*16);
 	struct draw_state st = {0};
 	st.width = VID_W;
 	st.height = VID_H;
@@ -81,12 +84,6 @@ int main()
 	// init DMAC
 	dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
-	// initialize graphics mode
-	// 640x480 (4:3)
-	// 853x480 (16:9)
-	// 768x576 (4:3)
-	// 1024x576 (16:9) 
-	int vmode = graph_get_region();
 	gs_init(&st, GS_PSM_32, GS_PSMZ_32);
 
 	graph_wait_vsync();
@@ -96,9 +93,9 @@ int main()
 		qword_t *q = buf;
 		memset(buf, 0, 100*16);
 		// clear
-		q = draw_disable_tests(q, 0, z);
+		q = draw_disable_tests(q, 0, &st.zb);
 		q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 10, 10, 10);
-		q = draw_enable_tests(q, 0, z);
+		q = draw_enable_tests(q, 0, &st.zb);
 		q = draw(q);
 		q = draw_finish(q);
 		dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);

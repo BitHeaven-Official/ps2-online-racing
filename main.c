@@ -22,12 +22,6 @@
 #define VID_W 640
 #define VID_H 448
 
-static qword_t *buf;
-
-#define DRAWBUF_LEN (100 * 16)
-
-zbuffer_t *z;
-
 
 static int tri[] = {
 	10, 10, 0,

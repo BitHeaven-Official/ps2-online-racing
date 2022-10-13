@@ -1,5 +1,5 @@
 EE_BIN=GAME0.ELF
-EE_OBJS=main.o
+EE_OBJS=main.o gs.o debug.o
 ISO_TGT=game0.iso
 
 

@@ -1,4 +1,4 @@
-EE_BIN=game0.elf
+EE_BIN=GAME0.ELF
 EE_OBJS=main.o
 ISO_TGT=game0.iso
 

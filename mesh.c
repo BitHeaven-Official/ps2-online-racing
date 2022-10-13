@@ -42,7 +42,7 @@ int load_model(struct model *m, char *b, int b_len)
 		m->vertex_count, m->face_count, m->buffer_len);
 
 	// Create giftag, set regs via A+D
-	q->dw[0] = 0x1000000000000001;
+	q->dw[0] = 0x1000000000000002;
 	q->dw[1] = 0x000000000000000e;
 	q++;
 	// set PRIM = triangle

@@ -3,6 +3,9 @@
 #include <tamtypes.h>
 
 
+#define GS_OFFSET_X 2048
+#define GS_OFFSET_Y 2048
+
 #define GS_CMD_BUFFER_LEN (40 * 16)
 
 static qword_t *gs_cmd_buffer;
@@ -35,7 +38,7 @@ int gs_init(struct draw_state *ds, int psm, int psmz)
 	qword_t *q = gs_cmd_buffer;
 	memset(gs_cmd_buffer, 0, DRAWBUF_LEN);
 	q = draw_setup_environment(q, 0, &ds->fb, ds->zb);
-	q = draw_primitive_xyoffset(q, 0, 2048-(ds->width/2), 2048-(ds->height/2));
+	q = draw_primitive_xyoffset(q, 0, GS_OFFSET_X-(ds->width/2), GS_OFFSET_Y-(ds->height/2));
 	q = draw_finish(q);
 	dma_channel_send_normal(DMA_CHANNEL_GIF, gs_cmd_buffer, q-gs_cmd_buffer, 0, 0);
 	draw_wait_finish();

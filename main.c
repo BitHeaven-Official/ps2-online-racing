@@ -14,7 +14,7 @@
 
 
 #define SHIFT_AS_I64(x, b) (((int64_t)x)<<b)
-#define BITftoi4(x) ((x) << 4)
+#define BITftoi4(x) ((x)<<4)
 
 #define OFFSET_X 2048
 #define OFFSET_Y 2048
@@ -25,6 +25,8 @@
 static qword_t *buf;
 
 #define DRAWBUF_LEN (100 * 16)
+
+zbuffer_t *z;
 
 
 int print_buffer(qword_t *b, int len)
@@ -49,31 +51,31 @@ int gs_finish()
   return 0;
 }
 
-int gs_init(int w, int h, int psm, int psmz, int vmode, int gmode)
+int gs_init(int width, int height, int psm, int psmz, int vmode, int gmode)
 {
   framebuffer_t fb;
-  fb.address = graph_vram_allocate(w, h, psm, GRAPH_ALIGN_PAGE);
-  fb.width = w;
-  fb.height = h;
+  fb.address = graph_vram_allocate(width, height, psm, GRAPH_ALIGN_PAGE);
+  fb.width = width;
+  fb.height = height;
   fb.psm = psm;
   fb.mask = 0;
 
-  zbuffer_t z;
-  z.address = graph_vram_allocate(w, h, psmz, GRAPH_ALIGN_PAGE);
-  z.enable = 0;
-  z.method = 0;
-  z.zsm = psmz;
-  z.mask = 0;
+  z->address = graph_vram_allocate(width, height, psmz, GRAPH_ALIGN_PAGE);
+  z->enable = 0;
+  z->method = 0;
+  z->zsm = 0;
+  z->mask = 0;
 
-  graph_set_mode(gmode, vmode, GRAPH_MODE_FIELD, GRAPH_DISABLE);
-  graph_set_screen(OFFSET_X, OFFSET_Y, w, h);
+  graph_set_mode(gmode, vmode, GRAPH_MODE_FIELD, GRAPH_DISABLE); 
+  graph_set_screen(0, 0, width, height);
   graph_set_bgcolor(0, 0, 0);
-  graph_set_framebuffer_filtered(fb.address, w, psm, 0, 0);
+  graph_set_framebuffer_filtered(fb.address, width, psm, 0, 0);
   graph_enable_output();
 
   qword_t *q = buf;
   memset(buf, 0, DRAWBUF_LEN);
-  q = draw_setup_environment(q, 0, &fb, &z);
+  q = draw_setup_environment(q, 0, &fb, z);
+  q = draw_primitive_xyoffset(q, 0, 2048-(VID_W/2), 2048-(VID_H/2));
   q = draw_finish(q);
   dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
   draw_wait_finish();
@@ -82,9 +84,9 @@ int gs_init(int w, int h, int psm, int psmz, int vmode, int gmode)
 }
 
 static int tri[] = {
-  10, 0, 0,
-  600, 200, 0,
-  20, 400, 0
+  10, 10, 0,
+  500, 20, 0,
+  300, 400, 0
 };
 
 qword_t *draw(qword_t *q)
@@ -106,19 +108,20 @@ qword_t *draw(qword_t *q)
   q->dw[1] = 0x0000000000515151;
   q++;
 
-  int x = 0, y = 0, z = 0;
+  int cx = BITftoi4(2048 - (VID_W/2));
+  int cy = BITftoi4(2048 - (VID_H/2));
 
   for(int i = 0; i < 3; i++) {
     q->dw[0] = (red&0xff) | (green&0xff)<<32;
-    q->dw[1] = (blue&0xff) | SHIFT_AS_I64(0x80, 32);
+    q->dw[1] = (blue&0xff) | (SHIFT_AS_I64(0x80, 32));
     q++;
-
+    
     int base = i*3;
-    x = BITftoi4(tri[base+0] + OFFSET_X);
-    y = BITftoi4(tri[base+1] + OFFSET_Y);
-    y = 0;
+    int x = BITftoi4(tri[base+0]) + cx;
+    int y = BITftoi4(tri[base+1]) + cy;
+    int z = 0;
     q->dw[0] = x | SHIFT_AS_I64(y, 32);
-    q->dw[1] = z;
+    q->dw[1] = z; 
     q++;
   }
 
@@ -129,6 +132,7 @@ int main()
 {
   printf("Hello\n");
   buf = malloc(DRAWBUF_LEN);
+  z = malloc(sizeof(zbuffer_t));
   // init DMAC
   dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
   dma_channel_fast_waits(DMA_CHANNEL_GIF);
@@ -138,21 +142,7 @@ int main()
   // 768x576 (4:3)
   // 1024x576 (16:9)
   int vmode = graph_get_region();
-  vmode = GRAPH_MODE_NTSC;
   gs_init(VID_W, VID_H, GS_PSM_32, GS_PSMZ_32, vmode, GRAPH_MODE_INTERLACED);
-
-  vertex_t atri[3] = {
-    { 10.0f, 2.0f, 0 },
-    { 310.0f, 2.0f, 0 },
-    { 600.0f, 300.0f, 0}
-  };
-
-  color_t col;
-  col.rgbaq = 0xff00f;
-
-  triangle_t ttri = {
-    atri[0], atri[1], atri[2], col
-  };
 
   graph_wait_vsync();
 
@@ -161,17 +151,18 @@ int main()
     qword_t *q = buf;
     memset(buf, 0, DRAWBUF_LEN);
     // clear
-    q = draw_clear(q, 0, 0, 0, VID_W, VID_H, 128, 0, 128);
-    q = draw_triangle_filled(q, 0, &ttri);
+    q = draw_disable_tests(q, 0, z);
+    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 10, 10, 10);
+    q = draw_enable_tests(q, 0, z);
     q = draw(q);
     q = draw_finish(q);
     dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
+    print_buffer(buf, q-buf);
 
-    // draw
-    // draw();
+    draw_wait_finish();
 
     // wait vsync
-    draw_wait_finish();
     graph_wait_vsync();
+    // sleep(2);
   }
 }

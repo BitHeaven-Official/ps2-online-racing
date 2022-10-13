@@ -19,6 +19,7 @@
 
 #define SHIFT_AS_I64(x, b) (((int64_t)x)<<b)
 #define BITftoi4(x) ((x)<<4)
+#define BITftoi4_I64(x) (((uint64_t)(x))<<4)
 #define fatalerror(st, msg, ...) printf("FATAL: " msg "\n", ##__VA_ARGS__); error_forever(st); ((void)0)
 
 // 640x480 (4:3)
@@ -33,6 +34,23 @@
 
 void error_forever(struct draw_state *st);
 
+
+void mesh_transform(struct model *m, char *b, int cx, int cy, float scale, float tx, float ty)
+{
+	int stride = m->vertex_size * 16;
+	for(int i = 0; i < m->vertex_count; i++) {
+		// get address of current vertex data
+		float *pos = (float*) (b + (stride * i) + (m->vertex_position_offset * 16));
+		float x = pos[0];
+		float y = pos[1];
+		float z = pos[2];
+		// float w = pos[3];
+		*((uint32_t*)pos) = BITftoi4_I64((x * scale) + tx) + cx;
+		*((uint32_t*)(pos+1)) = BITftoi4_I64((y * scale) + ty) + cy;
+		*((uint32_t*)(pos+2)) = (int)z;
+		pos[3] = 0;
+	}
+}
 
 int main()
 {
@@ -56,8 +74,8 @@ int main()
 
 	struct model m = {0};
 	m.r = 0xff;
-	m.g = 0xff;
-	m.b = 0xff;
+	m.g = 0x88;
+	m.b = 0x22;
 	int bytes_read = load_file(TGT_FILE, file_load_buffer, file_load_buffer_len);
 	if(bytes_read <= 0) {
 		fatalerror(&st, "failed to load file %s", TGT_FILE);
@@ -71,7 +89,6 @@ int main()
 	}
 
 	graph_wait_vsync();
-
 	while(1) {
 		dma_wait_fast();
 		qword_t *q = buf;
@@ -81,11 +98,18 @@ int main()
 		q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 10, 10, 10);
 		q = draw_enable_tests(q, 0, &st.zb);
 
-		memcpy(q, m.buffer, m.buffer_len);
-		q += (m.buffer_len / 16);
+		qword_t *model_verts_start = q;
 
+		memcpy(q, m.buffer, m.buffer_len);
+		info("copied mesh buffer with len=%d", m.buffer_len);
+		q += (m.buffer_len / 16);
 		q = draw_finish(q);
+
+		mesh_transform(&m, (char *)(model_verts_start + 4), BITftoi4(2048), BITftoi4(2048), 20.0f, 0, 0);
+
 		dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
+
+		info("draw from buffer with length %d", q-buf);
 
 		draw_wait_finish();
 

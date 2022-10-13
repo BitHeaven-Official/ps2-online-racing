@@ -2,6 +2,8 @@
 
 #include <dma.h>
 
+#include "debug.h"
+
 
 int print_buffer(qword_t *b, int len)
 {

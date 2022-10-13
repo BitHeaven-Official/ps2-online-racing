@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 #include "mesh.h"
+#include "debug.h"
 
 
 #define MODEL_BUFFER_PRE (4*16)
@@ -38,6 +38,8 @@ int load_model(struct model *m, char *b, int b_len)
 	m->vertex_size = 1;
 	m->vertex_position_offset = 0;
 	m->face_count = m->vertex_count * 3;
+	info("initializing model: verts=%d, faces=%d, bytes in buf=%d",
+		m->vertex_count, m->face_count, m->buffer_len);
 
 	// Create giftag, set regs via A+D
 	q->dw[0] = 0x1000000000000001;

@@ -16,8 +16,6 @@
 #define SHIFT_AS_I64(x, b) (((int64_t)x)<<b)
 #define BITftoi4(x) ((x)<<4)
 
-#define OFFSET_X 2048
-#define OFFSET_Y 2048
 
 #define VID_W 640
 #define VID_H 448

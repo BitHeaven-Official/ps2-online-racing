@@ -12,6 +12,8 @@
 
 #include <inttypes.h>
 
+#include "gs.h"
+
 
 #define SHIFT_AS_I64(x, b) (((int64_t)x)<<b)
 #define BITftoi4(x) ((x)<<4)
@@ -70,7 +72,12 @@ int main()
 {
 	printf("Hello\n");
 	buf = malloc(100*16);
-	z = malloc(sizeof(zbuffer_t));
+	struct draw_state st = {0};
+	st.width = VID_W;
+	st.height = VID_H;
+	st.vmode = graph_get_region();
+	st.gmode = GRAPH_MODE_INTERLACED;
+	
 	// init DMAC
 	dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
@@ -78,9 +85,9 @@ int main()
 	// 640x480 (4:3)
 	// 853x480 (16:9)
 	// 768x576 (4:3)
-	// 1024x576 (16:9)
+	// 1024x576 (16:9) 
 	int vmode = graph_get_region();
-	gs_init(VID_W, VID_H, GS_PSM_32, GS_PSMZ_32, vmode, GRAPH_MODE_INTERLACED);
+	gs_init(&st, GS_PSM_32, GS_PSMZ_32);
 
 	graph_wait_vsync();
 

@@ -1,6 +1,11 @@
+#include <stdlib.h>
+#include <string.h>
+
+#include <draw.h>
+#include <dma.h>
+
 #include "gs.h"
 
-#include <tamtypes.h>
 
 
 #define GS_OFFSET_X 2048
@@ -36,8 +41,8 @@ int gs_init(struct draw_state *ds, int psm, int psmz)
 	graph_enable_output();
 
 	qword_t *q = gs_cmd_buffer;
-	memset(gs_cmd_buffer, 0, DRAWBUF_LEN);
-	q = draw_setup_environment(q, 0, &ds->fb, ds->zb);
+	memset(gs_cmd_buffer, 0, GS_CMD_BUFFER_LEN);
+	q = draw_setup_environment(q, 0, &ds->fb, &ds->zb);
 	q = draw_primitive_xyoffset(q, 0, GS_OFFSET_X-(ds->width/2), GS_OFFSET_Y-(ds->height/2));
 	q = draw_finish(q);
 	dma_channel_send_normal(DMA_CHANNEL_GIF, gs_cmd_buffer, q-gs_cmd_buffer, 0, 0);

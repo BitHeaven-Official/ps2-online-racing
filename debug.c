@@ -1,3 +1,8 @@
+#include <stdio.h>
+
+#include <dma.h>
+
+
 int print_buffer(qword_t *b, int len)
 {
     printf("-- buffer\n");

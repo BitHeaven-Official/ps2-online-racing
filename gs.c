@@ -7,7 +7,6 @@
 #include "gs.h"
 
 
-
 #define GS_OFFSET_X 2048
 #define GS_OFFSET_Y 2048
 

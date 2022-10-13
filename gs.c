@@ -1,5 +1,7 @@
 #include "gs.h"
 
+#include <tamtypes.h>
+
 
 #define GS_CMD_BUFFER_LEN (40 * 16)
 

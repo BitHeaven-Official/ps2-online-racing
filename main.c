@@ -36,23 +36,6 @@
 void error_forever(struct draw_state *st);
 
 
-void mesh_transform(struct model *m, char *b, int cx, int cy, float scale, float tx, float ty)
-{
-	int stride = m->vertex_size * 16;
-	for(int i = 0; i < m->vertex_count; i++) {
-		// get address of current vertex data
-		float *pos = (float*) (b + (stride * i) + (m->vertex_position_offset * 16));
-		float x = pos[0];
-		float y = pos[1];
-		float z = pos[2];
-		// float w = pos[3];
-		*((uint32_t*)pos) = BITftoi4_I64((x * scale) + tx) + cx;
-		*((uint32_t*)(pos+1)) = BITftoi4_I64((y * scale) + ty) + cy;
-		*((uint32_t*)(pos+2)) = (int)z;
-		pos[3] = 0;
-	}
-}
-
 int main()
 {
 	printf("Hello\n");
@@ -89,6 +72,28 @@ int main()
 		fatalerror(&st, "failed to process model");
 	}
 
+	struct render_state r = {0};
+
+	r.camera_pos[0] = 0.0f;
+	r.camera_pos[2] = 400.0f;
+	r.camera_pos[3] = 1.0f;
+
+	r.camera_rot[3] = 1.0f;
+
+	r.clear_col[0] = 0xb1;
+	r.clear_col[1] = 0xce;
+	r.clear_col[2] = 0xcb;
+
+	r.offset_x = OFFSET_X;
+	r.offset_y = OFFSET_Y;
+
+	struct model_instance inst = {0};
+	inst.m = &m;
+	inst.scale[0] = 100.0f;
+	inst.scale[1] = 100.0f;
+	inst.scale[2] = 100.0f;
+	inst.scale[3] = 1.0f;
+
 	graph_wait_vsync();
 	while(1) {
 		update_draw_matrix(&r);
@@ -109,20 +114,18 @@ int main()
 		q += (m.buffer_len / 16);
 		q = draw_finish(q);
 
-		mesh_transform(&m, (char *)(model_verts_start + 4), BITftoi4(2048), BITftoi4(2048), 20.0f, 0, 0);
+		mesh_transform((char*) (model_verts_start + MESH_HEADER_SIZE), &inst, &r);
 
 		dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
 
 		info("draw from buffer with length %d", q-buf);
 
 		draw_wait_finish();
-
-		// wait vsync
 		graph_wait_vsync();
 
-		inst.scale[0] += 0.01f;
-		inst.scale[1] += 0.01f;
-		inst.scale[2] += 0.01f;
+		inst.rotate[0] += 0.1f;
+		inst.rotate[1] += 0.1f;
+		r.camera_pos[2] -= 0.1f;
 	}
 }
 

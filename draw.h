@@ -5,21 +5,21 @@
 
 
 struct render_state {
-  float offset_x;
-  float offset_y;
-  char clear_col[3];
-  MATRIX world_view;
-  MATRIX view_screen;
-  MATRIX world_to_screen;
-  VECTOR camera_pos;
-  VECTOR camera_rot;
+	float offset_x;
+	float offset_y;
+	char clear_col[3];
+	MATRIX world_view;
+	MATRIX view_screen;
+	MATRIX world_to_screen;
+	VECTOR camera_pos;
+	VECTOR camera_rot;
 };
 
 struct model_instance {
-  struct model *m;
-  VECTOR translate;
-  VECTOR scale;
-  VECTOR rotate;
+	struct model *m;
+	VECTOR translate;
+	VECTOR scale;
+	VECTOR rotate;
 };
 
 

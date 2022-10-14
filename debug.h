@@ -6,4 +6,6 @@
 
 int print_buffer(qword_t *b, int len);
 
+void error_forever(struct draw_state *st);
+
 #endif

@@ -14,6 +14,7 @@
 
 #include "gs.h"
 #include "mesh.h"
+#include "draw.h"
 #include "debug.h"
 
 
@@ -90,18 +91,21 @@ int main()
 
 	graph_wait_vsync();
 	while(1) {
+		update_draw_matrix(&r);
 		dma_wait_fast();
 		qword_t *q = buf;
 		memset(buf, 0, 20000*16);
 		// clear
 		q = draw_disable_tests(q, 0, &st.zb);
-		q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 10, 10, 10);
+		q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244,
+			VID_W, VID_H,
+			r.clear_col[0], r.clear_col[1], r.clear_col[2]);
 		q = draw_enable_tests(q, 0, &st.zb);
 
 		qword_t *model_verts_start = q;
-
 		memcpy(q, m.buffer, m.buffer_len);
 		info("copied mesh buffer with len=%d", m.buffer_len);
+		
 		q += (m.buffer_len / 16);
 		q = draw_finish(q);
 
@@ -115,35 +119,10 @@ int main()
 
 		// wait vsync
 		graph_wait_vsync();
-		sleep(2);
+
+		inst.scale[0] += 0.01f;
+		inst.scale[1] += 0.01f;
+		inst.scale[2] += 0.01f;
 	}
 }
 
-
-void error_forever(struct draw_state *st)
-{
-	qword_t *buf = malloc(1200);
-
-	int red = 5;
-	int i = 1;
-
-	while(1) {
-		if(red < 255 && red > 0) {
-			red += 5 * i;
-		}
-		else {
-			i *= -1;
-			red += 5 * i;
-		}
-
-		dma_wait_fast();
-		qword_t *q = buf;
-		memset(buf, 0, 1200);
-		q = draw_disable_tests(q, 0, &st->zb);
-		q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, red, 0, 0);
-		q = draw_finish(q);
-		dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
-		draw_wait_finish();
-		graph_wait_vsync();
-	}
-}

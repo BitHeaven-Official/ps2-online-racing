@@ -5,7 +5,7 @@
 
 #include "draw.h"
 #include "mesh.h"
-#include "log.h"
+#include "debug.h"
 
 
 void mesh_transform(char *b, struct model_instance *inst, struct render_state *d)
@@ -32,7 +32,7 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
 		*((uint32_t*)(pos+1)) = ftoi4(pos[1] + d->offset_y);
 		*((uint32_t*)(pos+2)) = (int) pos[2];
 
-		uint32_t * col = (uint32_t*) (b + (stride * i) + (inst->m->vertex_colour_offset * 16));
+		uint32_t * col = (uint32_t*) (b + (stride * i) + (inst->m->vertex_color_offset * 16));
 		col[1] = 0x0f;
 		col[2] = 0x0f;
 		col[0] = ((int) ((z / 1000.0f) * 0xa0)) & 0xff;

@@ -34,9 +34,10 @@ int load_model(struct model *m, char *b, int b_len)
 	m->buffer_len = b_len + MODEL_BUFFER_PRE;
 	qword_t *q = m->buffer;
 
-	m->vertex_count = b_len / 16;
-	m->vertex_size = 1;
-	m->vertex_position_offset = 0;
+	m->vertex_size = 2;
+	m->vertex_count = b_len / (16 / m->vertex_size);
+	m->vertex_position_offset = 1;
+	m->vertex_color_offset = 1;
 	m->face_count = m->vertex_count / 3;
 	info("initializing model: verts=%d, faces=%d, bytes in buf=%d",
 		m->vertex_count, m->face_count, m->buffer_len);

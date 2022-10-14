@@ -3,7 +3,7 @@ EE_OBJS=main.o gs.o debug.o mesh.o draw.o
 ISO_TGT=game0.iso
 
 
-EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug
+EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d
 
 EE_CFLAGS += -Wall --std=c99
 EE_LDFLAGS = -L$(PS2SDK)/ee/common/lib -L$(PS2SDK)/ee/lib

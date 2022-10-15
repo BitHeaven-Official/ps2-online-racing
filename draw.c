@@ -9,6 +9,9 @@
 #include "debug.h"
 
 
+#define ZMAX (1024 * 1024)
+
+
 void mesh_transform(char *b, struct model_instance *inst, struct render_state *d)
 {
 	MATRIX tmp;
@@ -26,17 +29,17 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
 
 		vector_apply((float *)v, (float *)v, tmp);
 
-		float z = pos[2];
-		info("vert depth = %f", z);
+        // float z = pos[2];
 
 		*((uint32_t*)pos) = ftoi4(pos[0] + d->offset_x);
 		*((uint32_t*)(pos+1)) = ftoi4(pos[1] + d->offset_y);
-		*((uint32_t*)(pos+2)) = (int)pos[2];
+		uint32_t zv = (uint32_t)(ZMAX * (pos[2] + 1000.0f) / 1700.0f);
+		*((uint32_t*)(pos+2)) = zv;
 
 		uint32_t * col = (uint32_t*)(b + (stride * i) + (inst->m->vertex_color_offset * 16));
 		col[1] = 0x0f;
 		col[2] = 0x0f;
-		col[0] = ((int)((z / 1000.0f) * 0xa0)) & 0xff;
+		col[0] = (char)(((zv * 1.0f) / (ZMAX * 1.0f)) * 0xff);
 		col[3] = 0x80;
 		
 		// ((uint32_t*)pos) = (short)((pos[0]+1.0f)*d->offset_x);

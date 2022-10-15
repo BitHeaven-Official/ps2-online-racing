@@ -27,8 +27,8 @@
 // 853x480 (16:9)
 // 768x576 (4:3)
 // 1024x576 (16:9)
-#define VID_W 640
-#define VID_H 448
+#define VID_W 853
+#define VID_H 480
 
 #define OFFSET_X 2048
 #define OFFSET_Y 2048
@@ -57,7 +57,7 @@ int main()
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
 
 	// init graphics mode
-	gs_init(&st, GS_PSM_32, GS_PSMZ_24);
+	gs_init(&st, GS_PSM_32, GS_PSMZ_32);
 
 	struct model m = {0};
 	m.r = 0xff;
@@ -111,7 +111,7 @@ int main()
 
 		qword_t *model_verts_start = q;
 		memcpy(q, m.buffer, m.buffer_len);
-		info("copied mesh buffer with len=%d", m.buffer_len);
+		// info("copied mesh buffer with len=%d", m.buffer_len);
 		
 		q += (m.buffer_len / 16);
 		q = draw_finish(q);
@@ -120,14 +120,13 @@ int main()
 
 		dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
 
-		info("draw from buffer with length %d", q-buf);
+		// info("draw from buffer with length %d", q-buf);
 
 		draw_wait_finish();
 		graph_wait_vsync();
 
-		inst.rotate[0] += 0.1f;
-		inst.rotate[1] += 0.1f;
-		r.camera_pos[2] -= 0.1f;
+		inst.rotate[0] += 0.01f;
+		inst.rotate[1] += 0.005f;
 	}
 }
 

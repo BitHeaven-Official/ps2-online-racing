@@ -60,7 +60,7 @@ void create_model_matrix(MATRIX tgt, VECTOR translate, VECTOR scale, VECTOR rota
 
 void update_draw_matrix(struct render_state *d)
 {
-	create_view_screen(d->view_screen, 4.0f / 3.0f, -3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 2000.0f);
+	create_view_screen(d->view_screen, 1.0f, -3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 2000.0f);
 	create_world_view(d->world_view, d->camera_pos, d->camera_rot);
 	matrix_multiply(d->world_to_screen, d->world_view, d->view_screen);
 }

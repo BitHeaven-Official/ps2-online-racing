@@ -24,7 +24,9 @@ struct model_instance {
 
 
 void mesh_transform(char *b, struct model_instance *inst, struct render_state *d);
+
 void create_model_matrix(MATRIX tgt, VECTOR translate, VECTOR scale, VECTOR rotate);
-void update_draw_matrix(struct render_state *d);
+
+void update_draw_matrix(struct render_state *d, int width, int height);
 
 #endif
